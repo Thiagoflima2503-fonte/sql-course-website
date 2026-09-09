@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "description": "Website profissional de vendas para o curso SQL: Do Zero ao Avançado",
   "type": "module",
-  "main": "index.html",
+  "main": "public/index.html",
   "scripts": {
-    "dev": "python3 -m http.server 8000",
-    "serve": "npx http-server .",
+    "dev": "python3 -m http.server 8000 --directory public",
+    "serve": "npx http-server public",
     "build": "echo 'No build step needed - static site'",
     "test": "echo 'No tests yet'"
   },
