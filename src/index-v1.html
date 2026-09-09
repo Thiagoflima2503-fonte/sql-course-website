@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL: Do Zero ao Avançado | Dominar Bancos de Dados PostgreSQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2d5a8c;
+            --accent: #ff9500;
+            --accent-light: #ffb233;
+            --text-dark: #1a1a1a;
+            --text-light: #666;
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--bg-light);
+        }
+
+        /* Header & Navigation */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 2rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: var(--accent-light);
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        /* Course Content Section */
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .module {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 4px solid var(--accent);
+        }
+
+        .module:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .module-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .module-content {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: white;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .benefit-item {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+        }
+
+        .benefit-item p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            background: var(--bg-light);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .testimonial {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        .testimonial:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .stars {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .testimonial-text {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .author-info h4 {
+            margin-bottom: 0.2rem;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .author-info p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: white;
+        }
+
+        .price-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .price-card.featured {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(255, 149, 0, 0.2);
+        }
+
+        .price-tag {
+            font-size: 3rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .price-tag span {
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .price-features li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: var(--bg-light);
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: var(--primary-light);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 1.5rem;
+            color: var(--text-light);
+            display: none;
+            background: white;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* CTA Section */
+        .cta-final {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .cta-final h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-final p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-top: 3px solid var(--accent);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .price-card.featured {
+                transform: scale(1);
+            }
+
+            .modules {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">SQL Pro</div>
+            <ul>
+                <li><a href="#conteudo">Conteúdo</a></li>
+                <li><a href="#depoimentos">Depoimentos</a></li>
+                <li><a href="#preco">Preço</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">Comprar Agora</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>SQL: Do Zero ao Avançado</h1>
+            <p class="subtitle">Domine PostgreSQL com Predicados, Joins, Janelas e Desempenho</p>
+            <p style="font-size: 1.1rem; margin-bottom: 2rem;">Aprenda com o autor Thiago Lima a construir queries poderosas e otimizadas. De iniciante a profissional em um único curso completo.</p>
+
+            <div class="hero-cta">
+                <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">Começar Agora</a>
+                <a href="#conteudo" class="btn-secondary">Ver Conteúdo</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">48</div>
+                    <div class="stat-label">Capítulos Completos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Partes Estruturadas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">450+</div>
+                    <div class="stat-label">Páginas de Conteúdo</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Alunos Satisfeitos</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefícios -->
+    <section class="section benefits">
+        <div class="container">
+            <h2 class="section-title">Por Que Escolher Este Curso?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">📚</div>
+                    <h3>Conteúdo Completo</h3>
+                    <p>De conceitos básicos até técnicas avançadas de otimização e desempenho em PostgreSQL</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Prático e Direto</h3>
+                    <p>Exemplos reais com código que você pode usar imediatamente em seus projetos</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">👨‍💼</div>
+                    <h3>Autor Experiente</h3>
+                    <p>Escrito por Thiago Lima, especialista em bancos de dados e SQL avançado</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Performance</h3>
+                    <h3>Otimizada</h3>
+                    <p>Aprenda a escrever queries eficientes e diagnósticos avançados</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🔐</div>
+                    <h3>Segurança e Integridade</h3>
+                    <p>Técnicas de constraints, ACID, transações e proteção de dados</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Análise de Dados</h3>
+                    <p>Séries temporais, concentração de dados e métricas avançadas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conteúdo do Curso -->
+    <section class="section" id="conteudo" style="background: white;">
+        <div class="container">
+            <h2 class="section-title">Conteúdo do Curso</h2>
+            <div class="modules">
+                <div class="module">
+                    <div class="module-number">I</div>
+                    <div class="module-title">Pensar em Dados Relacionais</div>
+                    <div class="module-content">
+                        Fundamentos de bancos de dados, SGBD, cliente/servidor e a linguagem SQL padrão
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">II</div>
+                    <div class="module-title">Selecionar com Intenção</div>
+                    <div class="module-content">
+                        Predicados, comparações, conjuntos, intervalos, padrões e ordenação de dados
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">III</div>
+                    <div class="module-title">Transformar Valores</div>
+                    <div class="module-content">
+                        Expressões condicionais, tipos, CAST, coerção, texto e manipulação de datas
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">IV</div>
+                    <div class="module-title">Resumir sem Perder Significado</div>
+                    <div class="module-content">
+                        Agregações, granularidade, GROUP BY, HAVING e métricas avançadas
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">V</div>
+                    <div class="module-title">Relacionar Tabelas com Segurança</div>
+                    <div class="module-content">
+                        INNER JOIN, OUTER JOIN, CROSS JOIN e análise de integridade relacional
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VI</div>
+                    <div class="module-title">Compor Consultas</div>
+                    <div class="module-content">
+                        Operações de conjunto, subqueries, queries correlacionadas e CTEs
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VII</div>
+                    <div class="module-title">SQL Avançado</div>
+                    <div class="module-content">
+                        Funções de janela, rankings, distribuição, LAG, LEAD e análise temporal
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VIII</div>
+                    <div class="module-title">SQL para Análise de Dados</div>
+                    <div class="module-content">
+                        Séries temporais, cortes, concentração e qualidade de dados
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">IX</div>
+                    <div class="module-title">Manipulação e Integridade</div>
+                    <div class="module-content">
+                        INSERT, UPSERT, UPDATE, DELETE, constraints, transações e ACID
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">X</div>
+                    <div class="module-title">Performance e Otimização</div>
+                    <div class="module-content">
+                        Índices, B-tree, EXPLAIN, planner e estratégias de execução
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">XI</div>
+                    <div class="module-title">SQL Profissional</div>
+                    <div class="module-content">
+                        Otimização orientada por evidência, materialized views, segurança e debugging
+                    </div>
+                </div>
+                <div class="module">
+                    <div class="module-number">XII</div>
+                    <div class="module-title">Consolidação e Referência</div>
+                    <div class="module-content">
+                        Projetos integrados, análise prática, performance em produção e roadmap
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="section testimonials" id="depoimentos">
+        <div class="container">
+            <h2 class="section-title">O Que Dizem Nossos Alunos</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Excelente curso! Saí de zero em SQL para conseguir fazer queries complexas. O conteúdo é bem estruturado e os exemplos práticos são muito úteis. Recomendo muito!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <h4>Marina Rocha</h4>
+                            <p>Analista de Dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Finalmente entendi como otimizar minhas queries! As partes sobre índices e EXPLAIN foram transformadoras para meu trabalho. O curso vale muito a pena."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">CJ</div>
+                        <div class="author-info">
+                            <h4>Carlos Junior</h4>
+                            <p>Desenvolvedor Backend</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Incrível! Trabalho com dados há 5 anos e ainda aprendi coisas novas. A profundidade no PostgreSQL é impressionante. Melhor investimento que fiz em desenvolvimento."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AF</div>
+                        <div class="author-info">
+                            <h4>Ana Fernandes</h4>
+                            <p>DBA Senior</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Comecei não sabendo nada de SQL e agora consigo criar analyses complexas. O autor explica tudo de forma clara e didática. Muito bom mesmo!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">PL</div>
+                        <div class="author-info">
+                            <h4>Paulo Lima</h4>
+                            <p>Cientista de Dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Perfeito para quem quer dominar SQL de verdade. Não é superficial, vai fundo em cada tópico. Os projetos integrados no final são muitíssimo úteis."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">BT</div>
+                        <div class="author-info">
+                            <h4>Bruno Torres</h4>
+                            <p>Engenheiro de Dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Surpreendentemente completo! Desde JOIN básico até window functions. Finalmente entendi quando usar cada coisa. Super recomendo para iniciantes e também para quem quer aprofundar."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">LS</div>
+                        <div class="author-info">
+                            <h4>Laura Silva</h4>
+                            <p>Estudante de Sistemas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Avaliações & Estatísticas -->
+    <section class="section" style="background: white;">
+        <div class="container">
+            <h2 class="section-title">Classificações e Reviews</h2>
+            <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 2rem;">
+                    <div>
+                        <div style="font-size: 4rem; font-weight: bold; color: var(--accent);">4.9</div>
+                        <div style="color: var(--accent); font-size: 1.2rem;">★★★★★</div>
+                    </div>
+                    <div style="text-align: left;">
+                        <p style="font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.5rem;"><strong>1050+ Avaliações</strong></p>
+                        <p style="color: var(--text-light);">Baseado em avaliações verificadas de alunos</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">98%</div>
+                        <div style="color: var(--text-light); margin-top: 0.5rem;">Recomendaria para amigos</div>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">94%</div>
+                        <div style="color: var(--text-light); margin-top: 0.5rem;">Conteúdo muito útil</div>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">96%</div>
+                        <div style="color: var(--text-light); margin-top: 0.5rem;">Explicações claras</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preço -->
+    <section class="section pricing" id="preco">
+        <div class="container">
+            <h2 class="section-title">Plano de Acesso</h2>
+            <div class="price-card featured">
+                <span class="badge">ACESSO VITALÍCIO</span>
+                <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem;">Acesso Completo ao Curso</h3>
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 1.1rem; color: var(--text-light); text-decoration: line-through;">De R$ 147,00</div>
+                    <div class="price-tag">R$ 67<span>,00</span></div>
+                    <div style="color: var(--success); font-weight: bold; font-size: 1rem;">Economize 54%</div>
+                </div>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">Investimento único. Acesso ilimitado para sempre.</p>
+                <ul class="price-features">
+                    <li>Todos os 48 capítulos</li>
+                    <li>Todas as 12 partes completas</li>
+                    <li>450+ páginas de conteúdo</li>
+                    <li>Exemplos práticos com PostgreSQL</li>
+                    <li>Projetos integrados</li>
+                    <li>Materiais de referência</li>
+                    <li>Atualizações futuras incluídas</li>
+                    <li>Suporte por email</li>
+                </ul>
+                <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary" style="width: 100%; text-align: center; padding: 1rem;">Comprar Agora</a>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 1.5rem;">✓ Garantia de 7 dias ou seu dinheiro de volta</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Perguntas Frequentes</h2>
+            <div style="max-width: 700px; margin: 0 auto;">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Preciso de experiência anterior com SQL?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Não! O curso começa do zero. A Parte I te ensina desde os conceitos fundamentais de bancos de dados e SQL até estar preparado para as partes mais avançadas. Se você já conhece SQL básico, terá ainda mais aproveitamento com o conteúdo avançado.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Qual banco de dados eu preciso?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        O curso usa PostgreSQL como referência principal, que é gratuito e open-source. Você pode baixá-lo em postgresql.org. O SQL padrão (Partes I-VI) funciona em qualquer banco relacional, mas as partes VII-XI focam em PostgreSQL.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Quantas horas de conteúdo tem?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        O ebook tem 450+ páginas. Dependendo da sua velocidade de leitura e prática, você pode completar em 40-80 horas. Recomendamos ler com prática paralela nos exemplos.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Tem atualizações futuras?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Sim! Quando você compra, recebe todas as atualizações futuras sem custo adicional. O conteúdo é continuamente mantido atualizado com novas versões do PostgreSQL e melhores práticas.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Como funciona a garantia?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Oferecemos garantia de 7 dias. Se o curso não for o que você esperava, reembolsamos 100% sem perguntas. Queremos que você se sinta seguro fazendo esse investimento.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Posso usar o conteúdo profissionalmente?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutamente! Todo o conhecimento do curso é para aplicar no seu trabalho, projetos pessoais, freelances e clientes. Você tem permissão de usar os exemplos e técnicas em produção.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="cta-final">
+        <div class="container">
+            <h2>Pronto Para Dominar SQL?</h2>
+            <p>Junte-se a mais de 1000 alunos que transformaram suas carreiras</p>
+            <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">Começar Meu Aprendizado</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Sobre o Curso</a>
+                <a href="#">Política de Privacidade</a>
+                <a href="#">Termos de Serviço</a>
+                <a href="#">Contato</a>
+            </div>
+            <p>Criado por Thiago Lima | SQL: Do Zero ao Avançado</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">© 2024 SQL Pro. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // Smooth scroll for links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Scroll reveal animations (simples)
+        const revealElements = document.querySelectorAll('.module, .testimonial, .benefit-item');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

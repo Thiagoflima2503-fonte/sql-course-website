@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL: Do Zero ao Avançado | Dominar Bancos de Dados PostgreSQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0A0E27;
+            --primary-light: #1a1f3a;
+            --accent-cyan: #00D9FF;
+            --accent-purple: #7C3AED;
+            --accent-cyan-light: #00F7FF;
+            --accent-purple-light: #9F7AEA;
+            --text-light: #E0E7FF;
+            --text-muted: #A8B2D1;
+            --bg-dark: #08091B;
+            --bg-darker: #050609;
+            --success: #10B981;
+            --border: rgba(0, 217, 255, 0.1);
+            --glow-cyan: 0 0 20px rgba(0, 217, 255, 0.3);
+            --glow-purple: 0 0 20px rgba(124, 58, 237, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            color: var(--text-light);
+            line-height: 1.6;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--primary) 50%, var(--bg-darker) 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+            animation: gradientShift 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, -50px); }
+        }
+
+        /* Header & Navigation */
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.05);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 2rem;
+            -webkit-text-fill-color: unset;
+            background: unset;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-cyan);
+            transition: width 0.3s;
+            box-shadow: var(--glow-cyan);
+        }
+
+        nav a:hover {
+            color: var(--accent-cyan);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: var(--bg-darker);
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(0, 217, 255, 0.5), 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(180deg, rgba(10, 14, 39, 0.8) 0%, rgba(26, 31, 58, 0.4) 100%);
+            padding: 5rem 2rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 700px;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            margin-bottom: 1rem;
+            line-height: 1.15;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 50%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: flex-start;
+            gap: 3rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        .stat {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Hero Image Illustration */
+        .hero-image {
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 350px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.15), inset 0 0 30px rgba(124, 58, 237, 0.05);
+            animation: float 6s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .hero-image {
+                position: static;
+                width: 100%;
+                max-width: 300px;
+                height: 300px;
+                margin: 2rem auto;
+                transform: none;
+            }
+
+            .hero {
+                min-height: auto;
+                flex-direction: column;
+            }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            padding: 5rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+            padding-bottom: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            box-shadow: 0 0 15px var(--accent-cyan);
+            border-radius: 2px;
+        }
+
+        /* Modules */
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .module {
+            background: rgba(26, 31, 58, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .module:hover {
+            transform: translateY(-12px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2), inset 0 0 20px rgba(0, 217, 255, 0.05);
+            background: rgba(26, 31, 58, 0.8);
+        }
+
+        .module-number {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: var(--bg-darker);
+            border-radius: 10px;
+            text-align: center;
+            line-height: 48px;
+            font-weight: 900;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .module-content {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: rgba(10, 14, 39, 0.7);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .benefit-item {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(26, 31, 58, 0.4);
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .benefit-item:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .benefit-item h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        .benefit-item p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: rgba(10, 14, 39, 0.7);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial {
+            background: rgba(26, 31, 58, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 4rem;
+            color: rgba(0, 217, 255, 0.1);
+            font-weight: bold;
+        }
+
+        .testimonial:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.15), inset 0 0 20px rgba(0, 217, 255, 0.03);
+            background: rgba(26, 31, 58, 0.8);
+        }
+
+        .stars {
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+        }
+
+        .testimonial-text {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid rgba(0, 217, 255, 0.1);
+            padding-top: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-darker);
+            font-weight: 900;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .author-info h4 {
+            margin-bottom: 0.2rem;
+            color: var(--accent-cyan);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .author-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Pricing */
+        .pricing {
+            background: rgba(10, 14, 39, 0.7);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-card {
+            background: rgba(26, 31, 58, 0.6);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            max-width: 450px;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2), inset 0 0 30px rgba(0, 217, 255, 0.05);
+            transform: scale(1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .price-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 40px rgba(124, 58, 237, 0.3), inset 0 0 30px rgba(124, 58, 237, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: var(--bg-darker);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .price-tag {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            margin: 1.5rem 0;
+        }
+
+        .price-tag span {
+            font-size: 1.2rem;
+        }
+
+        .old-price {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            margin-bottom: 0.5rem;
+        }
+
+        .discount-badge {
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .price-features li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--accent-cyan);
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-shadow: 0 0 8px rgba(0, 217, 255, 0.4);
+            flex-shrink: 0;
+        }
+
+        /* FAQ */
+        .faq {
+            background: rgba(10, 14, 39, 0.7);
+        }
+
+        .faq-item {
+            background: rgba(26, 31, 58, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(124, 58, 237, 0.05));
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            transition: all 0.3s;
+        }
+
+        .faq-question:hover {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(124, 58, 237, 0.1));
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+            color: var(--accent-cyan);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 1.5rem;
+            color: var(--text-muted);
+            display: none;
+            background: rgba(10, 14, 39, 0.5);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        /* CTA Final */
+        .cta-final {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border-top: 2px solid var(--accent-cyan);
+            border-bottom: 2px solid var(--accent-purple);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .cta-final h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final .btn-primary {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(8, 9, 27, 0.95);
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-cyan);
+            transition: width 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                gap: 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .hero-stats {
+                gap: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .price-card {
+                padding: 2rem;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">SQL Pro</div>
+            <ul>
+                <li><a href="#conteudo">Conteúdo</a></li>
+                <li><a href="#depoimentos">Depoimentos</a></li>
+                <li><a href="#preco">Preço</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">Comprar Agora</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-image">💻</div>
+        <div class="hero-content">
+            <h1>De Iniciante a Especialista em SQL</h1>
+            <p class="subtitle">Domine PostgreSQL: 48 capítulos, 12 partes, 1 preço de R$ 67</p>
+            <p>As mesmas técnicas que aumentam salário de DBA em 60%. Agora com 54% de desconto. Acesso vitalício.</p>
+
+            <div class="hero-cta">
+                <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">🚀 Começar SQL Agora</a>
+                <a href="#conteudo" class="btn-secondary">Ver Conteúdo Completo</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">48</div>
+                    <div class="stat-label">Capítulos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">450+</div>
+                    <div class="stat-label">Páginas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">150+</div>
+                    <div class="stat-label">Alunos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">4.9★</div>
+                    <div class="stat-label">Avaliação</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits -->
+    <section class="section benefits">
+        <div class="container">
+            <h2 class="section-title">Por Que Dominar SQL?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Salário Premium</h3>
+                    <p>DBAs e especialistas ganham até 3x mais que devs juniores</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Performance</h3>
+                    <p>Queries 50x mais rápidas com otimização inteligente</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Demanda Real</h3>
+                    <p>Skill que toda empresa precisa. Sempre em alta</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🚀</div>
+                    <h3>Carreira Acelerada</h3>
+                    <p>De desenvolvedor a especialista em dados</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🔒</div>
+                    <h3>Segurança</h3>
+                    <p>Proteja dados com constraints, ACID e transações</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Análise Avançada</h3>
+                    <p>Window functions, séries temporais, métricas complexas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conteúdo do Curso -->
+    <section class="section" id="conteudo">
+        <div class="container">
+            <h2 class="section-title">Conteúdo: 12 Partes Estruturadas</h2>
+            <div class="modules">
+                <div class="module">
+                    <div class="module-number">I</div>
+                    <div class="module-title">Pensar em Dados</div>
+                    <div class="module-content">Bancos de dados, SGBD, cliente/servidor e SQL padrão</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">II</div>
+                    <div class="module-title">Selecionar Inteligente</div>
+                    <div class="module-content">Predicados, comparações, conjuntos, padrões e ordenação</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">III</div>
+                    <div class="module-title">Transformar Valores</div>
+                    <div class="module-content">Expressões, CAST, coerção, texto e datas</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">IV</div>
+                    <div class="module-title">Resumir com Precisão</div>
+                    <div class="module-content">Agregações, granularidade, GROUP BY e HAVING</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">V</div>
+                    <div class="module-title">JOINs Poderosos</div>
+                    <div class="module-content">INNER, OUTER, CROSS JOIN e integridade relacional</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VI</div>
+                    <div class="module-title">Compor Consultas</div>
+                    <div class="module-content">Operações de conjunto, subqueries e CTEs</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VII</div>
+                    <div class="module-title">SQL Avançado</div>
+                    <div class="module-content">Window functions, rankings, LAG, LEAD</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">VIII</div>
+                    <div class="module-title">Análise de Dados</div>
+                    <div class="module-content">Séries temporais, concentração e qualidade</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">IX</div>
+                    <div class="module-title">Manipulação Segura</div>
+                    <div class="module-content">INSERT, UPDATE, DELETE, transações e ACID</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">X</div>
+                    <div class="module-title">Performance Otimizada</div>
+                    <div class="module-content">Índices, B-tree, EXPLAIN e execution plans</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">XI</div>
+                    <div class="module-title">SQL Profissional</div>
+                    <div class="module-content">Evidência, materialized views, segurança</div>
+                </div>
+                <div class="module">
+                    <div class="module-number">XII</div>
+                    <div class="module-title">Consolidação</div>
+                    <div class="module-content">Projetos integrados, produção e roadmap</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="section testimonials" id="depoimentos">
+        <div class="container">
+            <h2 class="section-title">Histórias de Sucesso</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Saí de R$ 2.5k para R$ 4.2k em 6 meses depois deste curso. SQL avançado mudou minha trajetória. Muito obrigado!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <h4>Marina Rocha</h4>
+                            <p>Analista de Dados → Sênior</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Queries que demoravam 3 minutos agora rodam em 2 segundos. EXPLAIN e índices salvaram meu trabalho. Excelente!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">CJ</div>
+                        <div class="author-info">
+                            <h4>Carlos Junior</h4>
+                            <p>Backend Dev → DBA</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Trabalhava com SQL há 5 anos e ainda aprendi coisas essenciais aqui. Window functions mudaram meu jogo. Top demais!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AF</div>
+                        <div class="author-info">
+                            <h4>Ana Fernandes</h4>
+                            <p>DBA Senior</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Comecei do zero em SQL e agora crio análises complexas sozinho. Explicações muito claras. Super recomendo!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">PL</div>
+                        <div class="author-info">
+                            <h4>Paulo Lima</h4>
+                            <p>Cientista de Dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Finalmente entendo quando usar cada JOIN e por quê. Projetos integrados no final são muitíssimo úteis. Perfeito!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">BT</div>
+                        <div class="author-info">
+                            <h4>Bruno Torres</h4>
+                            <p>Engenheiro de Dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"De SELECT * para window functions. O melhor curso de SQL que fiz. Conteúdo, estrutura, exemplos: tudo 10/10."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">LS</div>
+                        <div class="author-info">
+                            <h4>Laura Silva</h4>
+                            <p>Estudante → Júnior</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="section" style="padding: 4rem 0; background: rgba(10, 14, 39, 0.7); border-top: 1px solid var(--border);">
+        <div class="container">
+            <h2 class="section-title">Certificado por 150+ Alunos</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center; padding: 2rem; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">4.9</div>
+                    <div style="color: var(--accent-cyan); font-size: 1.2rem; margin-top: 0.5rem;">★★★★★</div>
+                    <div style="color: var(--text-muted); margin-top: 0.5rem;">150+ avaliações</div>
+                </div>
+                <div style="text-align: center; padding: 2rem; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--success);">98%</div>
+                    <div style="color: var(--text-muted); margin-top: 1rem;">Recomendaria para amigos</div>
+                </div>
+                <div style="text-align: center; padding: 2rem; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(10px);">
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--success);">94%</div>
+                    <div style="color: var(--text-muted); margin-top: 1rem;">Conteúdo muito útil</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preço -->
+    <section class="section pricing" id="preco">
+        <div class="container">
+            <h2 class="section-title">Investimento Único, Retorno Infinito</h2>
+            <div class="price-card">
+                <span class="badge">ACESSO VITALÍCIO</span>
+                <h3 style="color: var(--accent-cyan); font-size: 1.6rem; margin-bottom: 1rem; font-weight: 700;">Acesso Completo ao Curso</h3>
+                <div class="old-price">De R$ 147,00</div>
+                <div class="price-tag">R$ 67<span>,00</span></div>
+                <div class="discount-badge">💰 Economize 54%</div>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Investimento único. Acesso ilimitado para sempre. Sem taxa mensal.</p>
+                <ul class="price-features">
+                    <li>48 capítulos completos</li>
+                    <li>12 partes estruturadas</li>
+                    <li>450+ páginas de conteúdo</li>
+                    <li>Exemplos com PostgreSQL</li>
+                    <li>Projetos integrados</li>
+                    <li>Materiais de referência</li>
+                    <li>Atualizações futuras grátis</li>
+                    <li>Suporte por email</li>
+                </ul>
+                <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Garantir Acesso Agora - R$ 67</a>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1.5rem;">✓ Garantia de 7 dias ou 100% seu dinheiro de volta</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Perguntas Frequentes</h2>
+            <div style="max-width: 750px; margin: 0 auto;">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Preciso de experiência anterior com SQL?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Não! A Parte I começa do zero absoluto. Se você nunca viu SQL na vida, terá toda base. Se já conhece o básico, aproveitará as partes avançadas ainda mais.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Qual banco de dados usar?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        O curso foca em PostgreSQL (gratuito e open-source). SQL padrão (Partes I-VI) funciona em qualquer banco. Partes VII+ são PostgreSQL específicas por serem as melhores.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Atualizações futuras são incluídas?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Sim! Quando você compra, recebe todas as atualizações futuras sem nada extra. O conteúdo é mantido atualizado conforme PostgreSQL evolui.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Como funciona a garantia?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Garantia de 7 dias. Se não gostar, reembolso de 100% sem perguntas. Queremos que você se sinta seguro. Se não for o que esperava, dinheiro de volta.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Posso usar profissionalmente?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutamente! Toda técnica, exemplo e padrão é para aplicar no seu trabalho. Clientes, projetos pessoais, freelances: tudo permitido e recomendado.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Quantas horas são de conteúdo?
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        450+ páginas. Dependendo da velocidade, 40-80 horas de leitura + prática. Recomendamos ler com o PostgreSQL aberto ao lado, testando cada exemplo.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="cta-final">
+        <div class="container">
+            <h2>Pronto Para Transformar Sua Carreira em Dados?</h2>
+            <p>150+ alunos já começaram. Seu turno: R$ 67 acesso vitalício</p>
+            <a href="https://pay.kiwify.com.br/VZQa7LN" class="btn-primary">🚀 Começar Meu Aprendizado SQL</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Sobre o Curso</a>
+                <a href="#">Política de Privacidade</a>
+                <a href="#">Termos de Serviço</a>
+                <a href="#">Contato</a>
+            </div>
+            <p>Criado por Thiago Lima | SQL: Do Zero ao Avançado</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">© 2024 SQL Pro. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.module, .testimonial, .benefit-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
