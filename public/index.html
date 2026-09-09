@@ -1320,5 +1320,49 @@
             observer.observe(el);
         });
     </script>
+
+    <!-- Rastreamento de conversão do Google Ads no clique do botão de checkout -->
+    <script>
+        // ⬇️ COLE AQUI o RÓTULO da sua ação de conversão do Google Ads.
+        // Onde achar: Google Ads → Metas → Conversões → clique na ação →
+        // "Instalar a tag manualmente". Procure a linha:
+        //   gtag('event', 'conversion', { 'send_to': 'AW-18432270153/XXXXXXXXXXXXXXXX' });
+        // Cole abaixo APENAS a parte depois da barra (o XXXX...).
+        var AW_CONVERSION_ID = 'AW-18432270153';
+        var AW_CONVERSION_LABEL = ''; // ex.: 'AbCdEfGhIjKl-1234567'
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href*="pay.kiwify.com.br"]');
+            if (!link) return;
+
+            // Respeita novas abas (ctrl/cmd/shift/alt/botão do meio) e alvos _blank
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+            var isBlank = link.target && link.target.toLowerCase() === '_blank';
+            var canFire = (typeof gtag === 'function') && AW_CONVERSION_LABEL;
+
+            if (!canFire) return; // sem rótulo configurado, o botão navega normalmente
+
+            var conversion = {
+                send_to: AW_CONVERSION_ID + '/' + AW_CONVERSION_LABEL,
+                value: 67.0,
+                currency: 'BRL'
+            };
+
+            if (isBlank) {
+                // Abre em nova aba: só dispara o evento, sem interferir na navegação
+                gtag('event', 'conversion', conversion);
+                return;
+            }
+
+            // Mesma aba: segura a navegação até o evento ser registrado
+            e.preventDefault();
+            var url = link.href, navigated = false;
+            function go() { if (!navigated) { navigated = true; window.location.href = url; } }
+            conversion.event_callback = go;
+            gtag('event', 'conversion', conversion);
+            setTimeout(go, 1200); // fallback de segurança
+        });
+    </script>
 </body>
 </html>
